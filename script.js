@@ -21,6 +21,16 @@ function setLanguage(lang) {
   document.querySelectorAll('[data-placeholder-fr][data-placeholder-en]').forEach(el => {
     el.placeholder = lang === 'fr' ? el.dataset.placeholderFr : el.dataset.placeholderEn;
   });
+  const portfolioImage = document.getElementById('portfolio-image');
+  if (portfolioImage) {
+    if (lang === 'en') {
+      portfolioImage.src = 'realisations_futuristes_en.png';
+      portfolioImage.alt = 'Business Intelligence project portfolio';
+    } else {
+      portfolioImage.src = 'realisations_futuristes.png';
+      portfolioImage.alt = 'Portfolio de réalisations en Business Intelligence';
+    }
+  }
 
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === lang);
