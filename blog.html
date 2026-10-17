@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Blogue Consultation Data : actualités et ressources en Power BI, Power Query, R, analyse de données, reporting et cartographie.">
+  <title>Blogue | Consultation Data</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="blog.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav">
+    <a href="index.html#accueil" class="brand">
+      <span class="brand-mark">BI</span>
+      <span>Consultation Data</span>
+    </a>
+    <button class="menu-toggle" aria-label="Ouvrir le menu">☰</button>
+    <nav class="nav-links">
+      <a href="index.html#services" data-fr="Services" data-en="Services">Services</a>
+      <a href="index.html#realisations" data-fr="Réalisations" data-en="Projects">Réalisations</a>
+      <a href="blog.html" class="blog-active" data-fr="Blogue" data-en="Blog">Blogue</a>
+      <a href="index.html#apropos" data-fr="À propos" data-en="About">À propos</a>
+      <a href="index.html#contact" class="btn btn-sm" data-fr="Nous contacter" data-en="Contact us">Nous contacter</a>
+      <div class="language-switch" aria-label="Sélection de la langue">
+        <button class="lang-btn active" data-lang="fr" type="button">FR</button>
+        <span>/</span>
+        <button class="lang-btn" data-lang="en" type="button">EN</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="blog-main">
+  <section class="blog-hero">
+    <div class="container blog-hero-grid">
+      <div>
+        <span class="blog-kicker" data-fr="VEILLE & RESSOURCES" data-en="INSIGHTS & RESOURCES">VEILLE & RESSOURCES</span>
+        <h1 data-fr="BLOGUE" data-en="BLOG">BLOGUE</h1>
+        <p data-fr="Actualités, analyses et ressources pour mieux comprendre les données, explorer les outils et faire évoluer vos pratiques en Business Intelligence."
+           data-en="News, analysis and resources to better understand data, explore tools and advance your Business Intelligence practices.">
+          Actualités, analyses et ressources pour mieux comprendre les données, explorer les outils et faire évoluer vos pratiques en Business Intelligence.
+        </p>
+      </div>
+      <div class="blog-hero-visual">
+        <div class="hero-code-card">SQL</div>
+        <div class="hero-code-card">R</div>
+        <div class="hero-code-card">BI</div>
+        <div class="hero-mini-chart"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blog-controls">
+    <div class="container">
+      <div class="filter-group">
+        <span class="filter-label" data-fr="EXPLORER PAR THÈME" data-en="EXPLORE BY THEME">EXPLORER PAR THÈME</span>
+        <div id="themeFilters" class="filter-buttons"></div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label" data-fr="AFFINER PAR SUJET" data-en="REFINE BY TOPIC">AFFINER PAR SUJET</span>
+        <div id="subjectFilters" class="filter-buttons"></div>
+      </div>
+
+      <div class="blog-status">
+        <span id="articleCount"></span>
+        <span data-fr="Mise à jour mensuelle automatique" data-en="Automatic monthly update">Mise à jour mensuelle automatique</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="blog-listing">
+    <div class="container">
+      <div id="articlesGrid" class="articles-grid"></div>
+      <div id="emptyState" class="empty-state" hidden
+           data-fr="Aucun article ne correspond à ces filtres."
+           data-en="No articles match these filters.">Aucun article ne correspond à ces filtres.</div>
+      <nav id="pagination" class="pagination" aria-label="Pagination"></nav>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <span>© <span id="year"></span> Consultation Data</span>
+    <span data-fr="Québec • Canada • À distance" data-en="Quebec • Canada • Remote">Québec • Canada • À distance</span>
+  </div>
+</footer>
+
+<script src="blog.js"></script>
+</body>
+</html>

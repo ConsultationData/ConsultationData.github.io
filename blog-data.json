@@ -1,0 +1,202 @@
+{
+  "articles": [
+    {
+      "id": "fr-001",
+      "lang": "fr",
+      "title": "Les nouveautés Power BI Septembre 2026",
+      "source": "Next Decision",
+      "date": "2026-10-09",
+      "url": "https://www.next-decision.fr/wiki/les-nouveautes-power-bi-septembre-2026",
+      "theme": "Tableaux de bord",
+      "subject": "Power BI",
+      "excerpt": "Tour d’horizon des nouveautés Power BI annoncées autour de la FabCon, avec plusieurs évolutions en reporting, Copilot et modélisation."
+    },
+    {
+      "id": "fr-002",
+      "lang": "fr",
+      "title": "Veille Data & IA : semaine du 28 septembre au 4 octobre 2026",
+      "source": "2M",
+      "date": "2026-10-05",
+      "url": "https://www.2-m.fr/blog/veille-2026-10-05",
+      "theme": "Analyse de données",
+      "subject": "Power BI",
+      "excerpt": "Une veille francophone consacrée aux nouveautés Power BI, Microsoft Fabric et aux évolutions récentes de l’écosystème Data & IA."
+    },
+    {
+      "id": "fr-003",
+      "lang": "fr",
+      "title": "La veille et les études face aux enjeux du renseignement d’affaires",
+      "source": "IMA",
+      "date": "2026-10-05",
+      "url": "https://www.ima.eu/fr/la-13e-journee-de-la-veille-et-des-etudes-explore-les-enjeux-du-renseignement-daffaires",
+      "theme": "Analyse de données",
+      "subject": "Reporting",
+      "excerpt": "Retour sur les méthodes de recherche, d’analyse et de sécurisation de l’information stratégique en entreprise."
+    },
+    {
+      "id": "fr-004",
+      "lang": "fr",
+      "title": "Les résultats du Baromètre 2026 de France Num sont publiés",
+      "source": "Service Public Entreprendre",
+      "date": "2026-10-02",
+      "url": "https://entreprendre.service-public.gouv.fr/actualites/A19079",
+      "theme": "Analyse de données",
+      "subject": "Analyse",
+      "excerpt": "Le Baromètre France Num 2026 mesure les usages numériques des TPE et PME et illustre l’intérêt des données pour suivre la transformation des entreprises."
+    },
+    {
+      "id": "fr-005",
+      "lang": "fr",
+      "title": "Programmation avec R pour l’analyse de données",
+      "source": "Université Laval",
+      "date": "2026-09-23",
+      "url": "https://kiosque.ulaval.ca/etudes/cours/ift-7902-programmation-avec-r-pour-lanalyse-de-donnees",
+      "theme": "Formation",
+      "subject": "R",
+      "excerpt": "Un aperçu des compétences mobilisées pour programmer avec R et soutenir des analyses de données reproductibles."
+    },
+    {
+      "id": "fr-006",
+      "lang": "fr",
+      "title": "L’actualité en cartes et en chiffres",
+      "source": "Actus & Docs",
+      "date": "2026-09-17",
+      "url": "https://www.actusdocs.fr/",
+      "theme": "Analyse de données",
+      "subject": "Cartographie",
+      "excerpt": "Des analyses chiffrées et cartographiques basées sur des données publiques, avec des exemples concrets de visualisation territoriale."
+    },
+    {
+      "id": "fr-007",
+      "lang": "fr",
+      "title": "L’été 2026 analysé commune par commune",
+      "source": "DataFrance",
+      "date": "2026-09-16",
+      "url": "https://datafrance.org/analyses",
+      "theme": "Analyse de données",
+      "subject": "Cartographie",
+      "excerpt": "Une série d’analyses territoriales basées sur des données publiques, combinant cartographie, indicateurs et transparence méthodologique."
+    },
+    {
+      "id": "fr-008",
+      "lang": "fr",
+      "title": "Cartes.gouv.fr, le nouveau site souverain de cartographie",
+      "source": "IGN",
+      "date": "2026-06-25",
+      "url": "https://www.ign.fr/institut/espace-presse/cartesgouvfr-le-nouveau-site-souverain-de-cartographie",
+      "theme": "Analyse de données",
+      "subject": "Cartographie",
+      "excerpt": "L’IGN présente un nouveau point d’accès aux cartes et données territoriales, utile pour les usages géographiques et l’analyse spatiale."
+    },
+    {
+      "id": "fr-009",
+      "lang": "fr",
+      "title": "Enquête mensuelle de conjoncture – Début octobre 2026",
+      "source": "Banque de France",
+      "date": "2026-10-12",
+      "url": "https://www.banque-france.fr/fr/publications-et-statistiques/publications/enquete-mensuelle-de-conjoncture-debut-octobre-2026",
+      "theme": "Analyse de données",
+      "subject": "Analyse",
+      "excerpt": "Exemple d’exploitation d’indicateurs et de séries conjoncturelles pour produire une lecture synthétique de l’activité économique."
+    },
+    {
+      "id": "en-001",
+      "lang": "en",
+      "title": "Power BI October 2026 Feature Summary",
+      "source": "Microsoft Fabric Community",
+      "date": "2026-10-16",
+      "url": "https://community.fabric.microsoft.com/blog/fbc_pbiupdatesblog/power-bi-october-2026-feature-summary/5374650",
+      "theme": "Dashboards",
+      "subject": "Power BI",
+      "excerpt": "Microsoft’s October update highlights new reporting capabilities, semantic model improvements and AI-assisted report authoring."
+    },
+    {
+      "id": "en-002",
+      "lang": "en",
+      "title": "Positron October Release Highlights",
+      "source": "Posit Open Source",
+      "date": "2026-10-13",
+      "url": "https://opensource.posit.co/blog/2026-10-13_positron-2026-10-release/",
+      "theme": "Training",
+      "subject": "R",
+      "excerpt": "The October Positron release adds improvements for R, Python, data connections and AI-assisted data science workflows."
+    },
+    {
+      "id": "en-003",
+      "lang": "en",
+      "title": "Business Intelligence Observability: The Missing Layer of Modern Analytics",
+      "source": "TDWI",
+      "date": "2026-10-07",
+      "url": "https://tdwi.org/articles/2026/10/07/bi-all-business-intelligence-observability.aspx",
+      "theme": "Dashboards",
+      "subject": "Reporting",
+      "excerpt": "A look at observability for BI platforms and why reliable dashboards need monitoring just like data pipelines and infrastructure."
+    },
+    {
+      "id": "en-004",
+      "lang": "en",
+      "title": "posit::glimpse() Newsletter – October 2026",
+      "source": "Posit Open Source",
+      "date": "2026-10-07",
+      "url": "https://opensource.posit.co/blog/2026-10-07_glimpse-10-2026/",
+      "theme": "Training",
+      "subject": "R",
+      "excerpt": "A roundup of recent R and Python ecosystem news, open-source releases and data science tooling announced around posit::conf(2026)."
+    },
+    {
+      "id": "en-005",
+      "lang": "en",
+      "title": "How Posit Team governs AI for enterprise data science and research",
+      "source": "Posit",
+      "date": "2026-09-29",
+      "url": "https://posit.co/blog/how-posit-team-governs-ai-enterprise-data-science-and-research",
+      "theme": "Data analysis",
+      "subject": "R",
+      "excerpt": "A guide to governing AI assistants, packages and reproducible analytical workflows in enterprise data science environments."
+    },
+    {
+      "id": "en-006",
+      "lang": "en",
+      "title": "Power BI September 2026 Feature Summary",
+      "source": "Microsoft Fabric Community",
+      "date": "2026-09-29",
+      "url": "https://community.fabric.microsoft.com/blog/fbc_pbiupdatesblog/power-bi-september-2026-feature-summary/5325831",
+      "theme": "Dashboards",
+      "subject": "Power BI",
+      "excerpt": "A broad monthly release covering reporting, modeling, connectivity, Copilot and developer enhancements in Power BI."
+    },
+    {
+      "id": "en-007",
+      "lang": "en",
+      "title": "R, meet Snowflake: Introducing Posit’s skiLift and skiPatrol Packages",
+      "source": "Posit",
+      "date": "2026-09-15",
+      "url": "https://posit.co/blog",
+      "theme": "Data preparation",
+      "subject": "R",
+      "excerpt": "Posit introduces R tooling for working with Snowflake data and machine-learning workflows."
+    },
+    {
+      "id": "en-008",
+      "lang": "en",
+      "title": "Transition from ODBC to ADBC drivers in Power BI and Microsoft Fabric",
+      "source": "Microsoft Learn",
+      "date": "2026-10-01",
+      "url": "https://learn.microsoft.com/power-query/transition-to-adbc",
+      "theme": "Data preparation",
+      "subject": "Power Query",
+      "excerpt": "Microsoft documents the planned transition to ADBC drivers and key milestones affecting Power BI and Fabric connectivity."
+    },
+    {
+      "id": "en-009",
+      "lang": "en",
+      "title": "Map in a minute: Map a hurricane using ArcGIS Online",
+      "source": "Esri",
+      "date": "2026-10-09",
+      "url": "https://www.esri.com/arcgis-blog/products/arcgis-online",
+      "theme": "Data analysis",
+      "subject": "Mapping",
+      "excerpt": "A practical example of building a fast map with ArcGIS Online and Living Atlas, illustrating modern geospatial visualization."
+    }
+  ]
+}
