@@ -63,3 +63,36 @@
   .blog-hero-visual{height:220px}
   .hero-mini-chart{right:20px;width:160px}
 }
+
+
+/* --- Mise à jour visuelle du hero blogue --- */
+.blog-hero-image-frame{
+  background:#06142e;
+  border:1px solid rgba(87,163,255,.22);
+  box-shadow:0 25px 60px rgba(13,40,89,.18);
+}
+.blog-hero-image-frame img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+.blog-hero-image-frame:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(135deg, rgba(7,18,46,.32), rgba(7,18,46,.12) 45%, rgba(68,224,255,.08)),
+    radial-gradient(circle at 82% 18%, rgba(87,166,255,.18), transparent 18%);
+  z-index:1;
+}
+.blog-hero-image-overlay{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:26px;
+}
