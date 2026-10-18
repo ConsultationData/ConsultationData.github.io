@@ -6,7 +6,7 @@ from email.utils import parsedate_to_datetime
 from datetime import datetime, timezone, timedelta
 
 OUT = Path(__file__).with_name("blog-data.json")
-MAX_PER_LANG = 54
+MAX_PER_LANG = 36
 DAYS = 540
 
 SOURCE_ALLOW = {
