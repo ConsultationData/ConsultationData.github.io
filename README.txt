@@ -1,23 +1,25 @@
-CONSULTATION DATA — BLOGUE LIMITÉ À 4 PAGES
+CORRECTIF 4 PAGES — VERSION 2
 
-Configuration :
-- 9 articles par page
-- maximum 36 articles en français
-- maximum 36 articles en anglais
-- donc maximum 4 pages par langue
+Pourquoi tu voyais encore 1 page :
+- 36 était seulement un maximum.
+- L'ancien robot était trop strict et supprimait l'historique.
+- La pagination dépend aussi du filtre actif : avec R sélectionné, seuls les articles R comptent.
 
-À remplacer sur GitHub :
-- update_blog.py
+Nouvelle logique :
+- conserve les articles pertinents déjà trouvés ;
+- ajoute les nouveaux chaque mois ;
+- historique possible sur 3 ans ;
+- sources Data / BI / Data Science uniquement ;
+- vise jusqu'à 12 articles R ;
+- jusqu'à 12 articles Power BI ;
+- jusqu'à 12 articles Power Query ;
+- maximum 36 articles par langue = 4 pages de 9.
 
-blog.js et blog-data.json sont également inclus dans le ZIP par sécurité,
-mais si tes filtres fonctionnent déjà correctement, seul update_blog.py est nécessaire.
-
-Après remplacement :
-1. Commit changes
-2. Va dans Actions > Update Blog Articles
-3. Clique sur Run workflow
-4. Attends que le workflow passe au vert
-5. Recharge le blogue avec Ctrl + Shift + R
-
-Le workflow continuera à privilégier les sources Data / BI / Data Science
-et les sujets R, Power BI et Power Query.
+Sur GitHub :
+1. Remplace seulement update_blog.py.
+2. Commit changes.
+3. Actions > Update Blog Articles > Run workflow.
+4. Attends le workflow vert.
+5. Attends ensuite Pages build and deployment.
+6. Recharge le blogue avec Ctrl + Shift + R.
+7. Mets les filtres Thème = Tous et Sujet = Tous pour voir la pagination globale.
