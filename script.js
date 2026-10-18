@@ -9,7 +9,10 @@ document.querySelectorAll('.nav-links a').forEach(a => {
   a.addEventListener('click', () => nav?.classList.remove('open'));
 });
 
-document.getElementById('year').textContent = new Date().getFullYear();
+const yearEl = document.getElementById('year');
+if (yearEl) {
+  yearEl.textContent = new Date().getFullYear();
+}
 
 function setLanguage(lang) {
   document.documentElement.lang = lang;
@@ -19,11 +22,13 @@ function setLanguage(lang) {
   });
 
   document.querySelectorAll('[data-placeholder-fr][data-placeholder-en]').forEach(el => {
-    el.placeholder = lang === 'fr' ? el.dataset.placeholderFr : el.dataset.placeholderEn;
+    el.placeholder = lang === 'fr'
+      ? el.dataset.placeholderFr
+      : el.dataset.placeholderEn;
   });
 
-  
   const portfolioImage = document.getElementById('portfolio-image');
+
   if (portfolioImage) {
     if (lang === 'en') {
       portfolioImage.src = 'realisations_futuristes_en.png';
@@ -38,25 +43,17 @@ function setLanguage(lang) {
     btn.classList.toggle('active', btn.dataset.lang === lang);
   });
 
-  const menuLabel = lang === 'fr' ? 'Ouvrir le menu' : 'Open menu';
-  if (menuBtn) menuBtn.setAttribute('aria-label', menuLabel);
+  if (menuBtn) {
+    menuBtn.setAttribute(
+      'aria-label',
+      lang === 'fr' ? 'Ouvrir le menu' : 'Open menu'
+    );
+  }
 
   localStorage.setItem('consultationDataLanguage', lang);
 }
 
-
-  const portfolioImage = document.getElementById('portfolio-image');
-  if (portfolioImage) {
-    if (lang === 'en') {
-      portfolioImage.src = 'realisations_futuristes_en.png';
-      portfolioImage.alt = 'Business Intelligence project portfolio';
-    } else {
-      portfolioImage.src = 'realisations_futuristes.png';
-      portfolioImage.alt = 'Portfolio de réalisations en Business Intelligence';
-    }
-  }
-
-  document.querySelectorAll('.lang-btn').forEach(btn => {
+document.querySelectorAll('.lang-btn').forEach(btn => {
   btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
 });
 
