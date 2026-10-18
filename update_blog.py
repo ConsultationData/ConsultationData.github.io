@@ -7,130 +7,144 @@ from datetime import datetime, timezone, timedelta
 
 OUT = Path(__file__).with_name("blog-data.json")
 MAX_PER_LANG = 54
-DAYS = 365
+DAYS = 540
 
-QUERIES = {
+SOURCE_ALLOW = {
     "fr": [
-        '"Power BI" OR "tableau de bord" OR "business intelligence"',
-        '"Power Query" OR "préparation des données" OR "transformation des données"',
-        '"langage R" OR "programmation R" OR "R analyse de données"',
-        '"analyse de données" OR "visualisation de données" OR "data visualisation"',
-        '"reporting" OR "indicateurs de performance" OR "KPI"',
-        '"cartographie" OR "analyse géographique" OR "données géospatiales"'
+        "LeBigData", "DataScientest", "LeMagIT", "Journal du Net",
+        "ActuIA", "Microsoft", "Microsoft Fabric", "Microsoft Learn",
+        "Université Laval", "Posit"
     ],
     "en": [
-        '"Power BI" OR dashboard OR "business intelligence"',
-        '"Power Query" OR "data preparation" OR "data transformation"',
-        '"R programming" OR "R data science" OR "R analytics"',
-        '"data analysis" OR "data visualization" OR analytics',
-        'reporting OR KPI OR "performance indicators"',
-        'mapping OR geospatial OR "geographic analysis"'
+        "Microsoft Fabric Community", "Microsoft Learn", "Microsoft",
+        "Posit", "Posit Open Source", "DataCamp", "KDnuggets",
+        "Towards Data Science", "InfoWorld", "TechTarget",
+        "R-bloggers", "Data Science Central"
     ]
 }
 
-LOCALE = {
-    "fr": ("fr", "FR", "FR:fr"),
-    "en": ("en-US", "US", "US:en")
+THEMES = {
+    "fr": {
+        "Langage de programmation": ["programmation","langage","code","dax","script","fonction","package","ide"],
+        "Visualisation de données": ["visualisation","tableau de bord","dashboard","graphique","reporting","storytelling"],
+        "Analyse de données": ["analyse","analytics","adoption","entreprise","roi","décision","performance","data science"]
+    },
+    "en": {
+        "Programming language": ["programming","language","code","dax","script","function","package","ide"],
+        "Data visualization": ["visualization","dashboard","chart","reporting","storytelling","visual"],
+        "Data analysis": ["analysis","analytics","adoption","enterprise","roi","decision","performance","data science"]
+    }
 }
+
+SUBJECT_QUERIES = {
+    "R": ['"R programming"', '"R language"', 'RStudio', 'Posit', 'tidyverse', '"R data science"'],
+    "Power BI": ['"Power BI"'],
+    "Power Query": ['"Power Query"', '"M language"', '"langage M"']
+}
+
+LOCALE = {"fr":("fr","FR","FR:fr"), "en":("en-US","US","US:en")}
 
 def clean(text):
     text = re.sub(r'<[^>]+>', ' ', text or '')
-    text = html.unescape(text)
-    return re.sub(r'\s+', ' ', text).strip()
+    return re.sub(r'\s+', ' ', html.unescape(text)).strip()
 
-def classify(title, lang):
-    t = title.lower()
-    if "power query" in t or "transformation" in t or "préparation" in t or "data preparation" in t or "data wrangling" in t:
-        theme = "Préparation des données" if lang=="fr" else "Data preparation"
-        subject = "Power Query"
-    elif "power bi" in t or "dashboard" in t or "tableau de bord" in t:
-        theme = "Tableaux de bord" if lang=="fr" else "Dashboards"
-        subject = "Power BI"
-    elif re.search(r'(^|[^a-z])r([^a-z]|$)', t) or "rstudio" in t or "posit" in t:
-        theme = "Formation" if lang=="fr" else "Training"
-        subject = "R"
-    elif "cartograph" in t or "geospatial" in t or "mapping" in t or "géograph" in t:
-        theme = "Analyse de données" if lang=="fr" else "Data analysis"
-        subject = "Cartographie" if lang=="fr" else "Mapping"
-    elif "report" in t or "kpi" in t or "indicateur" in t:
-        theme = "Tableaux de bord" if lang=="fr" else "Dashboards"
-        subject = "Reporting"
-    else:
-        theme = "Analyse de données" if lang=="fr" else "Data analysis"
-        subject = "Analyse" if lang=="fr" else "Analysis"
-    return theme, subject
+def allowed_source(source, lang):
+    s=(source or "").lower()
+    return any(x.lower() in s for x in SOURCE_ALLOW[lang])
+
+def subject_match(text, subject):
+    t=text.lower()
+    if subject=="R":
+        return bool(re.search(r'(^|[^a-z])r([^a-z]|$)', t)) or any(x in t for x in ["rstudio","posit","tidyverse"])
+    if subject=="Power BI":
+        return "power bi" in t
+    if subject=="Power Query":
+        return "power query" in t or "m language" in t or "langage m" in t
+    return False
+
+def theme_match(text, lang, theme):
+    t=text.lower()
+    return any(k in t for k in THEMES[lang][theme])
 
 def fetch_feed(query, lang):
-    hl, gl, ceid = LOCALE[lang]
-    params = urllib.parse.urlencode({"q":query, "hl":hl, "gl":gl, "ceid":ceid})
-    url = "https://news.google.com/rss/search?" + params
-    req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0 ConsultationDataBlog/1.0"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        raw = r.read()
-    root = ET.fromstring(raw)
-    return root.findall(".//item")
+    hl,gl,ceid=LOCALE[lang]
+    params=urllib.parse.urlencode({"q":query,"hl":hl,"gl":gl,"ceid":ceid})
+    url="https://news.google.com/rss/search?"+params
+    req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0 ConsultationDataBlog/2.0"})
+    with urllib.request.urlopen(req,timeout=30) as r:
+        raw=r.read()
+    return ET.fromstring(raw).findall(".//item")
 
 def main():
-    cutoff = datetime.now(timezone.utc) - timedelta(days=DAYS)
-    collected = {"fr":{}, "en":{}}
+    cutoff=datetime.now(timezone.utc)-timedelta(days=DAYS)
+    found={"fr":{}, "en":{}}
 
-    for lang, queries in QUERIES.items():
-        for q in queries:
-            try:
-                items = fetch_feed(q, lang)
-            except Exception as e:
-                print("Feed error", lang, q, e)
-                continue
-
-            for item in items:
-                title = clean(item.findtext("title"))
-                url = clean(item.findtext("link"))
-                desc = clean(item.findtext("description"))
-                pub = item.findtext("pubDate") or ""
-                source_el = item.find("source")
-                source = clean(source_el.text if source_el is not None else "")
-                try:
-                    dt = parsedate_to_datetime(pub)
-                    if dt.tzinfo is None: dt = dt.replace(tzinfo=timezone.utc)
-                except Exception:
-                    continue
-                if dt < cutoff:
-                    continue
-                if not title or not url:
-                    continue
-
-                # Remove source suffix often appended by Google News
-                if source and title.endswith(" - " + source):
-                    title = title[:-(len(source)+3)].strip()
-
-                theme, subject = classify(title + " " + desc, lang)
-                key = hashlib.sha1((title.lower()+source.lower()).encode()).hexdigest()[:14]
-                excerpt = desc
-                if len(excerpt) > 230:
-                    excerpt = excerpt[:227].rsplit(" ",1)[0] + "…"
-                if not excerpt:
-                    excerpt = ("Article récent sélectionné pour sa pertinence avec les services de Consultation Data."
-                               if lang=="fr" else
-                               "Recent article selected for its relevance to Consultation Data services.")
-                collected[lang][key] = {
-                    "id": f"{lang}-{key}",
-                    "lang": lang,
-                    "title": title,
-                    "source": source or "Google News",
-                    "date": dt.date().isoformat(),
-                    "url": url,
-                    "theme": theme,
-                    "subject": subject,
-                    "excerpt": excerpt
-                }
-
-    articles = []
     for lang in ("fr","en"):
-        vals = sorted(collected[lang].values(), key=lambda x:x["date"], reverse=True)[:MAX_PER_LANG]
-        articles.extend(vals)
+        for subject, subject_terms in SUBJECT_QUERIES.items():
+            for theme, theme_terms in THEMES[lang].items():
+                q=f"({' OR '.join(subject_terms)}) ({' OR '.join(theme_terms[:5])})"
+                try:
+                    items=fetch_feed(q,lang)
+                except Exception as e:
+                    print("Feed error",lang,subject,theme,e)
+                    continue
 
-    OUT.write_text(json.dumps({"updated":datetime.now(timezone.utc).isoformat(), "articles":articles}, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Wrote {len(articles)} articles to {OUT}")
+                for item in items:
+                    title=clean(item.findtext("title"))
+                    url=clean(item.findtext("link"))
+                    desc=clean(item.findtext("description"))
+                    source_el=item.find("source")
+                    source=clean(source_el.text if source_el is not None else "")
+                    pub=item.findtext("pubDate") or ""
 
-if __name__ == "__main__":
+                    if not allowed_source(source,lang):
+                        continue
+                    text=f"{title} {desc}"
+                    if not subject_match(text,subject):
+                        continue
+                    if not theme_match(text,lang,theme):
+                        continue
+
+                    try:
+                        dt=parsedate_to_datetime(pub)
+                        if dt.tzinfo is None: dt=dt.replace(tzinfo=timezone.utc)
+                    except Exception:
+                        continue
+                    if dt<cutoff:
+                        continue
+
+                    if source and title.endswith(" - "+source):
+                        title=title[:-(len(source)+3)].strip()
+
+                    key=hashlib.sha1((title.lower()+source.lower()).encode()).hexdigest()[:14]
+                    excerpt=desc
+                    if len(excerpt)>230:
+                        excerpt=excerpt[:227].rsplit(" ",1)[0]+"…"
+                    if not excerpt:
+                        excerpt=("Article sélectionné pour sa pertinence directe avec les services de Consultation Data."
+                                 if lang=="fr" else
+                                 "Article selected for its direct relevance to Consultation Data services.")
+
+                    found[lang][key]={
+                        "id":f"{lang}-{key}",
+                        "lang":lang,
+                        "title":title,
+                        "source":source,
+                        "date":dt.date().isoformat(),
+                        "url":url,
+                        "theme":theme,
+                        "subject":subject,
+                        "excerpt":excerpt
+                    }
+
+    articles=[]
+    for lang in ("fr","en"):
+        vals=sorted(found[lang].values(),key=lambda x:x["date"],reverse=True)
+        articles.extend(vals[:MAX_PER_LANG])
+
+    OUT.write_text(json.dumps({"updated":datetime.now(timezone.utc).isoformat(),"articles":articles},
+                              ensure_ascii=False,indent=2),encoding="utf-8")
+    print(f"Wrote {len(articles)} relevant articles")
+
+if __name__=="__main__":
     main()

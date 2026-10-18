@@ -11,15 +11,15 @@ const state = {
 const labels = {
   fr: {
     all:'Tous',
-    themes:['Préparation des données','Analyse de données','Tableaux de bord','Formation'],
-    subjects:['Power BI','Power Query','R','Reporting','Cartographie','Analyse'],
+    themes:['Langage de programmation','Visualisation de données','Analyse de données'],
+    subjects:['R','Power BI','Power Query'],
     articleCount:n => `${n} article${n>1?'s':''}`,
     dateLocale:'fr-CA'
   },
   en: {
     all:'All',
-    themes:['Data preparation','Data analysis','Dashboards','Training'],
-    subjects:['Power BI','Power Query','R','Reporting','Mapping','Analysis'],
+    themes:['Programming language','Data visualization','Data analysis'],
+    subjects:['R','Power BI','Power Query'],
     articleCount:n => `${n} article${n>1?'s':''}`,
     dateLocale:'en-CA'
   }
@@ -63,27 +63,24 @@ function renderFilters(){
 }
 
 function translatedTheme(a){
-  if(state.lang==='fr') return a.theme;
-  const map = {
-    'Préparation des données':'Data preparation',
-    'Analyse de données':'Data analysis',
-    'Tableaux de bord':'Dashboards',
-    'Formation':'Training',
-    'Data preparation':'Data preparation',
-    'Data analysis':'Data analysis',
-    'Dashboards':'Dashboards',
-    'Training':'Training'
+  if(state.lang==='fr') {
+    const map={
+      'Programming language':'Langage de programmation',
+      'Data visualization':'Visualisation de données',
+      'Data analysis':'Analyse de données'
+    };
+    return map[a.theme] || a.theme;
+  }
+  const map={
+    'Langage de programmation':'Programming language',
+    'Visualisation de données':'Data visualization',
+    'Analyse de données':'Data analysis'
   };
   return map[a.theme] || a.theme;
 }
 
 function translatedSubject(a){
-  if(state.lang==='fr') {
-    const map={'Mapping':'Cartographie','Analysis':'Analyse'};
-    return map[a.subject] || a.subject;
-  }
-  const map={'Cartographie':'Mapping','Analyse':'Analysis'};
-  return map[a.subject] || a.subject;
+  return a.subject;
 }
 
 function filteredArticles(){
