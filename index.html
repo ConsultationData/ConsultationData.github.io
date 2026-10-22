@@ -393,30 +393,39 @@
 </section>
 
 <section id="apropos" class="section section-alt">
-  <div class="container about-grid">
-    <div>
-      <span class="eyebrow" data-fr="À propos" data-en="About">À propos</span>
-      <h2 data-fr="Transformer l'information en outils de décision."
-          data-en="Turning information into decision-making tools.">
-        Transformer l'information en outils de décision.
-      </h2>
+  <div class="container">
+    <div class="about-grid">
+      <div>
+        <span class="eyebrow" data-fr="À propos" data-en="About">À propos</span>
+        <h2 data-fr="Transformer l'information en outils de décision."
+            data-en="Turning information into decision-making tools.">
+          Transformer l'information en outils de décision.
+        </h2>
+      </div>
+
+      <div class="about-copy">
+        <p data-fr="Analyste en intelligence d'affaires, je développe des solutions permettant de rendre les données plus accessibles, plus visuelles et plus utiles aux décideurs."
+           data-en="As a Business Intelligence analyst, I develop solutions that make data more accessible, visual and useful to decision-makers.">
+          Analyste en intelligence d'affaires, je développe des solutions permettant de rendre les données plus accessibles, plus visuelles et plus utiles aux décideurs.
+        </p>
+
+        <p data-fr="Mon approche combine préparation des données, analyse, visualisation et compréhension du besoin métier afin de produire des livrables réellement exploitables."
+           data-en="My approach combines data preparation, analysis, visualization and business understanding to produce truly actionable deliverables.">
+          Mon approche combine préparation des données, analyse, visualisation et compréhension du besoin métier afin de produire des livrables réellement exploitables.
+        </p>
+      </div>
     </div>
 
-    <div class="about-copy">
-      <p data-fr="Analyste en intelligence d'affaires, je développe des solutions permettant de rendre les données plus accessibles, plus visuelles et plus utiles aux décideurs."
-         data-en="As a Business Intelligence analyst, I develop solutions that make data more accessible, visual and useful to decision-makers.">
-        Analyste en intelligence d'affaires, je développe des solutions permettant de rendre les données plus accessibles, plus visuelles et plus utiles aux décideurs.
-      </p>
-
-      <p data-fr="Mon approche combine préparation des données, analyse, visualisation et compréhension du besoin métier afin de produire des livrables réellement exploitables."
-         data-en="My approach combines data preparation, analysis, visualization and business understanding to produce truly actionable deliverables.">
-        Mon approche combine préparation des données, analyse, visualisation et compréhension du besoin métier afin de produire des livrables réellement exploitables.
-      </p>
-
-      <div class="tags">
-        <span>SQL</span>
-        <span>Python</span>
-        <span>Power BI</span>
+    <div class="about-video-block">
+      <div class="about-video-heading">
+        <span data-fr="Mission • Vision • Valeurs" data-en="Mission • Vision • Values">Mission • Vision • Valeurs</span>
+        <small data-fr="Découvrez Consultation Data en 40 secondes" data-en="Discover Consultation Data in 40 seconds">Découvrez Consultation Data en 40 secondes</small>
+      </div>
+      <div class="about-video-frame">
+        <video id="about-video" class="about-video" muted playsinline preload="metadata" controls aria-label="Présentation de Consultation Data">
+          <source src="Consultation_Data_Presentation_FR.mp4" type="video/mp4">
+          <span data-fr="Votre navigateur ne prend pas en charge la lecture vidéo." data-en="Your browser does not support video playback.">Votre navigateur ne prend pas en charge la lecture vidéo.</span>
+        </video>
       </div>
     </div>
   </div>
@@ -534,22 +543,15 @@
           <div class="form-field">
             <label for="budget" data-fr="Budget prévisionnel" data-en="Estimated budget">Budget prévisionnel</label>
             <select id="budget" name="Budget prévisionnel">
-              <option value="" selected
-                      data-fr="Veuillez sélectionner"
-                      data-en="Please select">Veuillez sélectionner</option>
-              <option value="Moins de 2 500 CAD"
-                      data-fr="Moins de 2 500 CAD"
-                      data-en="Under CAD 2,500">Moins de 2 500 CAD</option>
-              <option value="2 500 à 5 000 CAD"
-                      data-fr="2 500 à 5 000 CAD"
-                      data-en="CAD 2,500–5,000">2 500 à 5 000 CAD</option>
-              <option value="5 000 CAD et plus"
-                      data-fr="5 000 CAD et plus"
-                      data-en="CAD 5,000+">5 000 CAD et plus</option>
-              <option value="À discuter"
-                      data-fr="À discuter"
-                      data-en="To be discussed">À discuter</option>
+              <option value="" selected data-budget-key="placeholder">Veuillez sélectionner</option>
+              <option value="Moins de 2 500 CAD" data-budget-key="under">Moins de 2 500 CAD</option>
+              <option value="2 500 à 5 000 CAD" data-budget-key="mid">2 500 à 5 000 CAD</option>
+              <option value="5 000 CAD et plus" data-budget-key="high">5 000 CAD et plus</option>
+              <option value="À discuter" data-budget-key="discuss">À discuter</option>
             </select>
+            <p id="budget-currency-note" class="budget-currency-note" aria-live="polite">
+              Montants de référence en CAD. Conversion locale indicative lorsqu'elle est disponible.
+            </p>
           </div>
         </div>
 
