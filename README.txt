@@ -1,30 +1,28 @@
-CONSULTATION DATA — PACK FINAL COMPLET
+CORRECTIF BLOG — SOURCES STRICTEMENT SPÉCIALISÉES
 
-Fichiers inclus :
-- index.html
-- styles.css
-- script.js
-- Consultation_Data_Presentation_FR.mp4
-- Consultation_Data_Presentation_EN.mp4
+Remplace à la racine de ton dépôt GitHub :
+- update_blog.py
+- blog-data.json
 
-À faire sur GitHub :
-1. Va dans ton dépôt ConsultationData.github.io.
-2. Ajoute/téléverse les 5 fichiers à la RACINE du dépôt.
-3. Accepte le remplacement de index.html, styles.css et script.js.
-4. Ajoute les deux vidéos FR et EN.
-5. Commit changes.
-6. Attends que "Pages build and deployment" soit vert.
-7. Recharge le site avec Ctrl + Shift + R.
+Ce correctif :
+- supprime les sources hors sujet déjà présentes (TV, radio, universités, médias généralistes, téléchargement) ;
+- autorise uniquement une liste blanche de blogs / médias spécialisés Data, BI, analytics et éditeurs logiciels ;
+- recherche uniquement les sujets R, Power BI et Power Query ;
+- conserve les thèmes Programmation, Visualisation de données et Analyse de données ;
+- refuse les pages d'accueil, PDF, téléchargements, cours, support et pages de formation ;
+- essaie de conserver uniquement des pages de type article/blog ;
+- limite à 36 articles par langue (4 pages de 9 maximum) ;
+- n'ajoute pas de contenu hors sujet simplement pour remplir les pages.
 
-Ce pack comprend :
-- section À propos sans les pastilles SQL / Python / Power BI ;
-- vidéo Mission / Vision / Valeurs intégrée ;
-- autoplay muet quand la section À propos devient visible ;
-- vidéo FR quand le site est en français ;
-- vidéo EN quand le site est en anglais ;
-- conservation du bilingue sur la page principale ;
-- image du portfolio FR/EN selon la langue ;
-- budget affiché dans la devise locale lorsque possible ;
-- CAD conservé comme référence finale dans le formulaire.
+Sources autorisées principales :
+FR : LeBigData, ThinkR, DataScientest, ActuIA, Microsoft Fabric Community, Microsoft Power BI Blog.
+EN : Microsoft Fabric Community, Microsoft Power BI Blog, SQLBI, RADACAD, Power BI Tips, Guy in a Cube, Posit, R-bloggers, DataCamp, KDnuggets, Towards Data Science, Analytics Vidhya, Appsilon, Jumping Rivers.
 
-Tu n'as pas besoin de remplacer les fichiers du blogue avec ce pack.
+Après remplacement :
+1. Commit changes
+2. Actions > Update Blog Articles > Run workflow
+3. Attendre le workflow puis Pages build and deployment
+4. Ctrl + Shift + R
+
+Important :
+Le script privilégie la qualité des sources. S'il ne trouve que 12 bons articles, il affichera 12 articles au lieu d'ajouter des pages universitaires, télé, radio ou téléchargements.

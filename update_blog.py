@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
@@ -7,780 +6,403 @@ import json
 import re
 import html
 import hashlib
-
 from pathlib import Path
 from email.utils import parsedate_to_datetime
 from datetime import datetime, timezone, timedelta
-
-
-# ============================================================
-# CONFIGURATION
-# ============================================================
+from urllib.parse import urlparse
 
 OUT = Path(__file__).with_name("blog-data.json")
 
-# 9 articles/page × 4 pages
+# 4 pages maximum × 9 articles
 MAX_PER_LANG = 36
-
-# 3 thèmes × 3 sujets = 9 combinaisons
-# 4 articles par combinaison = 36 articles maximum
-PER_COMBINATION = 4
-
-# On accepte jusqu'à 3 ans d'historique afin d'avoir assez
-# de contenu pertinent sans utiliser des articles hors sujet.
 HISTORY_DAYS = 1095
-
-
-THEMES = {
-    "fr": [
-        "Langage de programmation",
-        "Visualisation de données",
-        "Analyse de données",
-    ],
-    "en": [
-        "Programming language",
-        "Data visualization",
-        "Data analysis",
-    ],
-}
-
-
-SUBJECTS = [
-    "R",
-    "Power BI",
-    "Power Query",
-]
-
-
-# Sources spécialisées privilégiées.
-# Le script interroge Google News avec site:...
-DOMAINS = {
-    "fr": [
-        "lebigdata.fr",
-        "datascientest.com",
-        "lemagit.fr",
-        "actuia.com",
-        "developpez.com",
-        "microsoft.com",
-        "learn.microsoft.com",
-        "posit.co",
-    ],
-    "en": [
-        "community.fabric.microsoft.com",
-        "learn.microsoft.com",
-        "microsoft.com",
-        "posit.co",
-        "datacamp.com",
-        "kdnuggets.com",
-        "towardsdatascience.com",
-        "r-bloggers.com",
-        "sqlbi.com",
-        "radacad.com",
-        "powerbi.tips",
-        "appsilon.com",
-        "jumpingrivers.com",
-    ],
-}
-
 
 LOCALE = {
     "fr": ("fr", "FR", "FR:fr"),
-    "en": ("en-US", "US", "US:en"),
+    "en": ("en-US", "US", "US:en")
 }
 
-
-# ============================================================
-# TERMES DE RECHERCHE
-# ============================================================
-
-SUBJECT_TERMS = {
+SUBJECT_QUERIES = {
     "fr": {
-        "R": [
-            '"langage R"',
-            '"R programming"',
-            '"R data science"',
-            'RStudio',
-            'Posit',
-            'tidyverse',
-        ],
-        "Power BI": [
-            '"Power BI"',
-            '"Power BI entreprise"',
-            '"Power BI adoption"',
-            '"Power BI DAX"',
-        ],
-        "Power Query": [
-            '"Power Query"',
-            '"langage M"',
-            '"Power Query transformation"',
-        ],
+        "R": ['"R programming"', '"langage R"', '"R data science"', 'RStudio', 'tidyverse', 'Shiny'],
+        "Power BI": ['"Power BI"', '"Power BI DAX"', '"Power BI dashboard"', '"Power BI reporting"'],
+        "Power Query": ['"Power Query"', '"Power Query M"', '"langage M"', '"Power Query transformation"']
     },
-
     "en": {
-        "R": [
-            '"R programming"',
-            '"R language"',
-            '"R data science"',
-            'RStudio',
-            'Posit',
-            'tidyverse',
-        ],
-        "Power BI": [
-            '"Power BI"',
-            '"Power BI enterprise"',
-            '"Power BI adoption"',
-            '"Power BI DAX"',
-        ],
-        "Power Query": [
-            '"Power Query"',
-            '"M language"',
-            '"Power Query transformation"',
-        ],
-    },
+        "R": ['"R programming"', '"R language"', '"R data science"', 'RStudio', 'tidyverse', 'Shiny'],
+        "Power BI": ['"Power BI"', '"Power BI DAX"', '"Power BI dashboard"', '"Power BI reporting"'],
+        "Power Query": ['"Power Query"', '"Power Query M"', '"M language"', '"Power Query transformation"']
+    }
 }
-
 
 THEME_TERMS = {
     "fr": {
         "Langage de programmation": [
-            "programmation",
-            "langage",
-            "code",
-            "DAX",
-            "script",
-            "fonction",
-            "package",
-            "langage M",
+            "programmation", "langage", "code", "dax", "script", "fonction",
+            "package", "ide", "langage m", "m language", "shiny", "rstudio"
         ],
-
         "Visualisation de données": [
-            "visualisation",
-            "tableau de bord",
-            "dashboard",
-            "graphique",
-            "reporting",
-            "rapport",
-            "data storytelling",
+            "visualisation", "tableau de bord", "dashboard", "graphique",
+            "reporting", "storytelling", "visuel", "rapport", "dataviz"
         ],
-
         "Analyse de données": [
-            "analyse",
-            "analytics",
-            "entreprise",
-            "adoption",
-            "performance",
-            "décision",
-            "ROI",
-            "data science",
-        ],
+            "analyse", "analytics", "adoption", "entreprise", "roi",
+            "décision", "performance", "data science", "données", "kpi"
+        ]
     },
-
     "en": {
         "Programming language": [
-            "programming",
-            "language",
-            "code",
-            "DAX",
-            "script",
-            "function",
-            "package",
-            "M language",
+            "programming", "language", "code", "dax", "script", "function",
+            "package", "ide", "m language", "shiny", "rstudio"
         ],
-
         "Data visualization": [
-            "visualization",
-            "dashboard",
-            "chart",
-            "reporting",
-            "report",
-            "storytelling",
+            "visualization", "dashboard", "chart", "reporting",
+            "storytelling", "visual", "report", "dataviz"
         ],
-
         "Data analysis": [
-            "analysis",
-            "analytics",
-            "enterprise",
-            "adoption",
-            "performance",
-            "decision",
-            "ROI",
-            "data science",
-        ],
-    },
+            "analysis", "analytics", "adoption", "enterprise", "roi",
+            "decision", "performance", "data science", "data", "kpi"
+        ]
+    }
 }
 
+# STRICT whitelist: only specialist blogs / software publishers / practitioner communities.
+# No TV, radio, university pages, download portals or general news sites.
+SOURCES = {
+    "fr": [
+        {"name": "LeBigData", "domain": "lebigdata.fr", "aliases": ["LeBigData"]},
+        {"name": "ThinkR", "domain": "thinkr.fr", "aliases": ["ThinkR"]},
+        {"name": "DataScientest", "domain": "datascientest.com", "aliases": ["DataScientest", "Liora"]},
+        {"name": "ActuIA", "domain": "actuia.com", "aliases": ["ActuIA"]},
+        {"name": "Microsoft Fabric Community", "domain": "community.fabric.microsoft.com",
+         "aliases": ["Microsoft Fabric Community", "Microsoft Fabric Community Blog"]},
+        {"name": "Microsoft Power BI Blog", "domain": "powerbi.microsoft.com",
+         "aliases": ["Microsoft Power BI Blog", "Power BI Blog"]},
+    ],
+    "en": [
+        {"name": "Microsoft Fabric Community", "domain": "community.fabric.microsoft.com",
+         "aliases": ["Microsoft Fabric Community", "Microsoft Fabric Community Blog"]},
+        {"name": "Microsoft Power BI Blog", "domain": "powerbi.microsoft.com",
+         "aliases": ["Microsoft Power BI Blog", "Power BI Blog"]},
+        {"name": "SQLBI", "domain": "sqlbi.com", "aliases": ["SQLBI"]},
+        {"name": "RADACAD", "domain": "radacad.com", "aliases": ["RADACAD"]},
+        {"name": "Power BI Tips", "domain": "powerbi.tips", "aliases": ["Power BI Tips"]},
+        {"name": "Guy in a Cube", "domain": "guyinacube.com", "aliases": ["Guy in a Cube"]},
+        {"name": "Posit", "domain": "posit.co", "aliases": ["Posit"]},
+        {"name": "Posit Open Source", "domain": "opensource.posit.co", "aliases": ["Posit Open Source"]},
+        {"name": "R-bloggers", "domain": "r-bloggers.com", "aliases": ["R-bloggers"]},
+        {"name": "DataCamp", "domain": "datacamp.com", "aliases": ["DataCamp"]},
+        {"name": "KDnuggets", "domain": "kdnuggets.com", "aliases": ["KDnuggets"]},
+        {"name": "Towards Data Science", "domain": "towardsdatascience.com",
+         "aliases": ["Towards Data Science"]},
+        {"name": "Analytics Vidhya", "domain": "analyticsvidhya.com",
+         "aliases": ["Analytics Vidhya"]},
+        {"name": "Appsilon", "domain": "appsilon.com", "aliases": ["Appsilon"]},
+        {"name": "Jumping Rivers", "domain": "jumpingrivers.com", "aliases": ["Jumping Rivers"]},
+    ]
+}
 
-# ============================================================
-# OUTILS
-# ============================================================
+BLOCKED_WORDS = [
+    "tf1", "radio", "television", "télévision", "university", "université",
+    "college", "collège", "download", "télécharger", "softonic", "clubic",
+    "zdnet", "journal du net", "le figaro", "le monde", "bfm", "franceinfo",
+    "cnews", "cnn", "bbc", "reuters", "youtube"
+]
 
 def clean(text):
-    """Nettoyer du texte HTML/RSS."""
-    text = text or ""
-    text = re.sub(r"<[^>]+>", " ", text)
-    text = html.unescape(text)
-    return re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"<[^>]+>", " ", text or "")
+    return re.sub(r"\s+", " ", html.unescape(text)).strip()
 
+def norm(text):
+    return re.sub(r"\s+", " ", (text or "").strip().lower())
 
-def make_key(title, source):
-    raw = f"{title.lower().strip()}|{source.lower().strip()}"
-    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+def source_rule(source_text, lang):
+    s = norm(source_text)
+    for rule in SOURCES[lang]:
+        if any(s == norm(alias) for alias in rule["aliases"]):
+            return rule
+    return None
 
+def blocked(text):
+    t = norm(text)
+    return any(word in t for word in BLOCKED_WORDS)
 
-def fetch_feed(query, lang):
-    """Interroger Google News RSS."""
-
-    hl, gl, ceid = LOCALE[lang]
-
-    params = urllib.parse.urlencode({
-        "q": query,
-        "hl": hl,
-        "gl": gl,
-        "ceid": ceid,
-    })
-
-    url = "https://news.google.com/rss/search?" + params
-
-    request = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent":
-            "Mozilla/5.0 ConsultationDataBlog/4.0"
-        },
-    )
-
-    with urllib.request.urlopen(request, timeout=30) as response:
-        xml_data = response.read()
-
-    root = ET.fromstring(xml_data)
-
-    return root.findall(".//item")
-
-
-def subject_matches(text, subject):
-    text = text.lower()
-
-    if subject == "Power BI":
-        return "power bi" in text
-
-    if subject == "Power Query":
-        return (
-            "power query" in text
-            or "langage m" in text
-            or "m language" in text
-        )
-
+def subject_match(text, subject):
+    t = text.lower()
     if subject == "R":
         return (
-            bool(
-                re.search(
-                    r"(^|[^a-z])r([^a-z]|$)",
-                    text
-                )
-            )
-            or "rstudio" in text
-            or "posit" in text
-            or "tidyverse" in text
+            bool(re.search(r"(^|[^a-z])r([^a-z]|$)", t))
+            or any(k in t for k in ["rstudio", "posit", "tidyverse", "shiny"])
         )
-
+    if subject == "Power BI":
+        return "power bi" in t
+    if subject == "Power Query":
+        return "power query" in t or "langage m" in t or "m language" in t
     return False
 
+def choose_theme(text, lang):
+    t = text.lower()
+    scores = {
+        theme: sum(1 for term in terms if term in t)
+        for theme, terms in THEME_TERMS[lang].items()
+    }
+    best = max(scores, key=scores.get)
+    if scores[best] == 0:
+        return "Analyse de données" if lang == "fr" else "Data analysis"
+    return best
 
-def load_existing_articles():
-    """Conserver les bons articles déjà présents."""
+def fetch_feed(query, lang):
+    hl, gl, ceid = LOCALE[lang]
+    params = urllib.parse.urlencode({"q": query, "hl": hl, "gl": gl, "ceid": ceid})
+    url = "https://news.google.com/rss/search?" + params
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Mozilla/5.0 ConsultationDataBlog/5.0"}
+    )
+    with urllib.request.urlopen(req, timeout=30) as response:
+        return ET.fromstring(response.read()).findall(".//item")
 
+def resolve_url(url):
+    """Resolve Google News redirects to the real article when possible."""
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Mozilla/5.0 ConsultationDataBlog/5.0"}
+        )
+        with urllib.request.urlopen(req, timeout=15) as response:
+            return response.geturl()
+    except Exception:
+        return url
+
+def hostname(url):
+    try:
+        return (urlparse(url).hostname or "").lower().removeprefix("www.")
+    except Exception:
+        return ""
+
+def path_is_blog_like(url, rule):
+    """
+    Reject obvious home pages, category pages, PDFs, downloads and help/course portals.
+    Allow article-style pages from specialist sources.
+    """
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower().removeprefix("www.")
+    path = (parsed.path or "").lower()
+
+    if host != rule["domain"] and not host.endswith("." + rule["domain"]):
+        return False
+
+    if path in {"", "/"}:
+        return False
+
+    if any(x in path for x in [".pdf", "/download", "/downloads", "/help/", "/support/", "/course", "/courses", "/training"]):
+        return False
+
+    if rule["domain"] == "community.fabric.microsoft.com":
+        return "/blog/" in path
+    if rule["domain"] == "powerbi.microsoft.com":
+        return "/blog/" in path
+    if rule["domain"] == "posit.co":
+        return "/blog/" in path
+    if rule["domain"] == "opensource.posit.co":
+        return "/blog/" in path
+    if rule["domain"] == "datacamp.com":
+        return "/blog/" in path and "/category/" not in path
+    if rule["domain"] == "datascientest.com":
+        return not any(sub in host for sub in ["help.", "support.", "allianz.", "michelin."])
+
+    return True
+
+def article_key(title, source):
+    raw = f"{title.strip().lower()}|{source.strip().lower()}"
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+
+def load_existing():
     if not OUT.exists():
         return []
-
     try:
-        data = json.loads(
-            OUT.read_text(encoding="utf-8")
-        )
-
-        return data.get("articles", [])
-
+        return json.loads(OUT.read_text(encoding="utf-8")).get("articles", [])
     except Exception:
         return []
 
-
-def valid_existing_article(article):
-
+def valid_existing(article):
     lang = article.get("lang")
-    subject = article.get("subject")
-    theme = article.get("theme")
-
     if lang not in {"fr", "en"}:
         return False
 
-    if subject not in SUBJECTS:
+    subject = article.get("subject")
+    if subject not in {"R", "Power BI", "Power Query"}:
         return False
 
-    if theme not in THEMES[lang]:
+    source = article.get("source", "")
+    url = article.get("url", "")
+    rule = source_rule(source, lang)
+    if not rule:
+        return False
+
+    if blocked(f"{source} {article.get('title','')} {url}"):
+        return False
+
+    if not path_is_blog_like(url, rule):
         return False
 
     return True
 
-
-# ============================================================
-# CONSTRUCTION DES REQUÊTES
-# ============================================================
-
-def build_queries(lang, subject, theme):
-
-    subject_terms = SUBJECT_TERMS[lang][subject]
-    theme_terms = THEME_TERMS[lang][theme]
-
-    subject_query = " OR ".join(subject_terms)
-    theme_query = " OR ".join(
-        f'"{term}"'
-        if " " in term
-        else term
-        for term in theme_terms
-    )
-
-    queries = []
-
-    # Regrouper les domaines par 3 pour ne pas créer
-    # des requêtes trop longues.
-    domains = DOMAINS[lang]
-
-    for i in range(0, len(domains), 3):
-
-        group = domains[i:i + 3]
-
-        source_query = " OR ".join(
-            f"site:{domain}"
-            for domain in group
-        )
-
-        query = (
-            f"({subject_query}) "
-            f"({theme_query}) "
-            f"({source_query})"
-        )
-
-        queries.append(query)
-
-    return queries
-
-
-# ============================================================
-# PROGRAMME PRINCIPAL
-# ============================================================
-
 def main():
+    cutoff = datetime.now(timezone.utc) - timedelta(days=HISTORY_DAYS)
+    pool = {"fr": {}, "en": {}}
 
-    cutoff = (
-        datetime.now(timezone.utc)
-        - timedelta(days=HISTORY_DAYS)
-    )
-
-    # Articles déjà connus
-    existing = load_existing_articles()
-
-    pools = {
-        "fr": {},
-        "en": {},
-    }
-
-    # --------------------------------------------------------
-    # 1. CONSERVER L'HISTORIQUE PERTINENT
-    # --------------------------------------------------------
-
-    for article in existing:
-
-        if not valid_existing_article(article):
+    # 1) Keep only existing articles that still pass the STRICT whitelist.
+    removed = 0
+    for article in load_existing():
+        if not valid_existing(article):
+            removed += 1
             continue
 
         try:
-            article_date = datetime.fromisoformat(
-                article["date"]
-                + "T12:00:00+00:00"
-            )
+            dt = datetime.fromisoformat(article["date"] + "T12:00:00+00:00")
         except Exception:
+            removed += 1
             continue
 
-        if article_date < cutoff:
+        if dt < cutoff:
+            removed += 1
             continue
 
-        lang = article["lang"]
+        if article.get("theme") not in THEME_TERMS[article["lang"]]:
+            article["theme"] = choose_theme(
+                f"{article.get('title','')} {article.get('excerpt','')}",
+                article["lang"]
+            )
 
-        key = make_key(
-            article.get("title", ""),
-            article.get("source", ""),
-        )
+        key = article_key(article.get("title", ""), article.get("source", ""))
+        pool[article["lang"]][key] = article
 
-        pools[lang][key] = article
+    print(f"Existing articles rejected by strict source rules: {removed}")
 
-
-    # --------------------------------------------------------
-    # 2. RECHERCHE DE NOUVEAUX ARTICLES
-    # --------------------------------------------------------
-
+    # 2) Discover new content source-by-source.
+    # Every query is explicitly restricted with site:domain.
     for lang in ("fr", "en"):
-
-        for subject in SUBJECTS:
-
-            for theme in THEMES[lang]:
-
-                queries = build_queries(
-                    lang,
-                    subject,
-                    theme,
-                )
-
-                for query in queries:
+        for rule in SOURCES[lang]:
+            for subject in ("R", "Power BI", "Power Query"):
+                for terms in SUBJECT_QUERIES[lang][subject]:
+                    query = f"site:{rule['domain']} {terms}"
 
                     try:
-                        items = fetch_feed(
-                            query,
-                            lang,
-                        )
-
-                    except Exception as error:
-                        print(
-                            "Erreur RSS:",
-                            lang,
-                            subject,
-                            theme,
-                            error,
-                        )
+                        items = fetch_feed(query, lang)
+                    except Exception as e:
+                        print("Feed error:", rule["name"], subject, e)
                         continue
 
-
                     for item in items:
+                        title = clean(item.findtext("title"))
+                        google_url = clean(item.findtext("link"))
+                        desc = clean(item.findtext("description"))
+                        pub = item.findtext("pubDate") or ""
+                        source_el = item.find("source")
+                        source_text = clean(source_el.text if source_el is not None else "")
 
-                        title = clean(
-                            item.findtext("title")
-                        )
-
-                        url = clean(
-                            item.findtext("link")
-                        )
-
-                        description = clean(
-                            item.findtext("description")
-                        )
-
-                        published = (
-                            item.findtext("pubDate")
-                            or ""
-                        )
-
-                        source_element = (
-                            item.find("source")
-                        )
-
-                        source = clean(
-                            source_element.text
-                            if source_element
-                            is not None
-                            else ""
-                        )
-
-
-                        if not title or not url:
+                        if not title or not google_url:
                             continue
 
-
-                        full_text = (
-                            title
-                            + " "
-                            + description
-                        )
-
-
-                        # L'article doit réellement parler
-                        # du sujet sélectionné.
-                        if not subject_matches(
-                            full_text,
-                            subject,
-                        ):
+                        matched_rule = source_rule(source_text, lang)
+                        if not matched_rule or matched_rule["domain"] != rule["domain"]:
                             continue
 
+                        if blocked(f"{title} {desc} {source_text}"):
+                            continue
+
+                        text = f"{title} {desc}"
+                        if not subject_match(text, subject):
+                            continue
 
                         try:
-
-                            dt = parsedate_to_datetime(
-                                published
-                            )
-
+                            dt = parsedate_to_datetime(pub)
                             if dt.tzinfo is None:
-                                dt = dt.replace(
-                                    tzinfo=timezone.utc
-                                )
-
+                                dt = dt.replace(tzinfo=timezone.utc)
                         except Exception:
                             continue
-
 
                         if dt < cutoff:
                             continue
 
+                        real_url = resolve_url(google_url)
 
-                        # Google News ajoute souvent
-                        # " - Nom de la source"
-                        if (
-                            source
-                            and title.endswith(
-                                " - " + source
-                            )
-                        ):
+                        # If Google keeps its redirect URL, reject it rather than guessing.
+                        if hostname(real_url).endswith("google.com") or hostname(real_url).endswith("googleusercontent.com"):
+                            continue
 
-                            title = title[
-                                :-(len(source) + 3)
-                            ].strip()
+                        if not path_is_blog_like(real_url, matched_rule):
+                            continue
 
+                        if source_text and title.endswith(" - " + source_text):
+                            title = title[:-(len(source_text) + 3)].strip()
 
-                        excerpt = description
-
+                        excerpt = desc
                         if len(excerpt) > 240:
-
-                            excerpt = (
-                                excerpt[:237]
-                                .rsplit(" ", 1)[0]
-                                + "…"
-                            )
-
-
+                            excerpt = excerpt[:237].rsplit(" ", 1)[0] + "…"
                         if not excerpt:
-
                             excerpt = (
-                                "Article spécialisé sélectionné "
-                                "pour sa pertinence avec les "
-                                "services de Consultation Data."
+                                "Article spécialisé sélectionné pour sa pertinence en data, Business Intelligence et logiciels analytiques."
                                 if lang == "fr"
                                 else
-                                "Specialized article selected "
-                                "for its relevance to "
-                                "Consultation Data services."
+                                "Specialist article selected for its relevance to data, Business Intelligence and analytics software."
                             )
 
-
-                        key = make_key(
-                            title,
-                            source,
-                        )
-
-
-                        pools[lang][key] = {
-
-                            "id":
-                            f"{lang}-{key}",
-
-                            "lang":
-                            lang,
-
-                            "title":
-                            title,
-
-                            "source":
-                            source or "Google News",
-
-                            "date":
-                            dt.date().isoformat(),
-
-                            "url":
-                            url,
-
-                            "theme":
-                            theme,
-
-                            "subject":
-                            subject,
-
-                            "excerpt":
-                            excerpt,
+                        key = article_key(title, matched_rule["name"])
+                        pool[lang][key] = {
+                            "id": f"{lang}-{key}",
+                            "lang": lang,
+                            "title": title,
+                            "source": matched_rule["name"],
+                            "date": dt.date().isoformat(),
+                            "url": real_url,
+                            "theme": choose_theme(text, lang),
+                            "subject": subject,
+                            "excerpt": excerpt
                         }
 
-
-    # --------------------------------------------------------
-    # 3. CRÉER LES 4 PAGES
-    # --------------------------------------------------------
-
+    # 3) Max 36 per language. No junk padding: if only 14 good articles exist, show 14.
     final_articles = []
 
-
     for lang in ("fr", "en"):
+        articles = list(pool[lang].values())
+        articles.sort(key=lambda x: x.get("date", ""), reverse=True)
 
-        all_articles = list(
-            pools[lang].values()
-        )
-
+        # Balance subjects so one tool does not take the whole blog.
         selected = []
+        selected_ids = set()
+        per_subject_target = MAX_PER_LANG // 3
 
-        already_used = set()
-
-
-        # 9 combinaisons :
-        # 3 sujets × 3 thèmes
-        for subject in SUBJECTS:
-
-            for theme in THEMES[lang]:
-
-                candidates = [
-
-                    article
-
-                    for article
-                    in all_articles
-
-                    if (
-                        article.get("subject")
-                        == subject
-
-                        and article.get("theme")
-                        == theme
-                    )
-                ]
-
-
-                candidates.sort(
-                    key=lambda x:
-                    x.get("date", ""),
-                    reverse=True,
-                )
-
-
-                combo_count = 0
-
-
-                for article in candidates:
-
-                    if combo_count >= PER_COMBINATION:
-                        break
-
-
-                    article_id = article.get("id")
-
-
-                    if article_id in already_used:
-                        continue
-
-
-                    selected.append(article)
-
-                    already_used.add(
-                        article_id
-                    )
-
-                    combo_count += 1
-
-
-        # ----------------------------------------------------
-        # Si certaines combinaisons n'ont pas 4 articles,
-        # compléter avec les meilleurs articles restants.
-        # ----------------------------------------------------
+        for subject in ("R", "Power BI", "Power Query"):
+            candidates = [a for a in articles if a.get("subject") == subject]
+            for article in candidates[:per_subject_target]:
+                selected.append(article)
+                selected_ids.add(article["id"])
 
         if len(selected) < MAX_PER_LANG:
+            for article in articles:
+                if article["id"] in selected_ids:
+                    continue
+                selected.append(article)
+                selected_ids.add(article["id"])
+                if len(selected) >= MAX_PER_LANG:
+                    break
 
-            remaining = [
+        selected.sort(key=lambda x: x.get("date", ""), reverse=True)
+        final_articles.extend(selected[:MAX_PER_LANG])
 
-                article
-
-                for article
-                in all_articles
-
-                if article.get("id")
-                not in already_used
-            ]
-
-
-            remaining.sort(
-                key=lambda x:
-                x.get("date", ""),
-                reverse=True,
-            )
-
-
-            needed = (
-                MAX_PER_LANG
-                - len(selected)
-            )
-
-
-            selected.extend(
-                remaining[:needed]
-            )
-
-
-        # Maximum 36
-        selected = selected[
-            :MAX_PER_LANG
-        ]
-
-
-        # Page 1 = plus récents
-        selected.sort(
-            key=lambda x:
-            x.get("date", ""),
-            reverse=True,
-        )
-
-
-        final_articles.extend(
-            selected
-        )
-
-
-        print(
-            f"{lang.upper()} : "
-            f"{len(selected)} articles"
-        )
-
-
-        for subject in SUBJECTS:
-
-            count = sum(
-
-                1
-                for article
-                in selected
-
-                if article.get("subject")
-                == subject
-            )
-
-            print(
-                f"  {subject}: "
-                f"{count}"
-            )
-
-
-    # --------------------------------------------------------
-    # 4. SAUVEGARDE
-    # --------------------------------------------------------
-
-    data = {
-
-        "updated":
-        datetime.now(
-            timezone.utc
-        ).isoformat(),
-
-        "articles":
-        final_articles,
-    }
-
+        print(f"{lang.upper()}: {min(len(selected), MAX_PER_LANG)} strict specialist articles")
 
     OUT.write_text(
-
-        json.dumps(
-            data,
-            ensure_ascii=False,
-            indent=2,
-        ),
-
-        encoding="utf-8",
+        json.dumps({
+            "updated": datetime.now(timezone.utc).isoformat(),
+            "articles": final_articles
+        }, ensure_ascii=False, indent=2),
+        encoding="utf-8"
     )
 
-
-    print(
-        "Total:",
-        len(final_articles),
-        "articles enregistrés."
-    )
-
+    print("Total saved:", len(final_articles))
 
 if __name__ == "__main__":
     main()
